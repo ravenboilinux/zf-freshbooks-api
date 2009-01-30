@@ -80,8 +80,7 @@ class Freshbooks_Api
             $method = new Freshbooks_Method_Default($methodName);
         }
         $method->setArguments( $arguments );
-        $response = $this->dispatch( $method );
-        return $method->getResult();
+        return $this->dispatch( $method );
     }
     
     public function dispatch(&$method){
@@ -91,7 +90,7 @@ class Freshbooks_Api
         $client->setRawData( $method->getRequestXML() );
         $client->setAuth( $this->_token, 'XXX');
         $method->setResponse( $client->request() );
-        return !$method->getResult()->isError();
+        return $method->getResult();
         
     }
     
