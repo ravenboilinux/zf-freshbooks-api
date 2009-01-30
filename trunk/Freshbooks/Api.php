@@ -58,7 +58,7 @@ class Freshbooks_Api
         $this->_token = $token;
     }
     
-    public function &call($methodName, $arguments=null)
+    public function call($methodName, $arguments=null)
     {
         if( empty($this->_apiUri) ){
             $this->_error = "No API URI specified - Required";

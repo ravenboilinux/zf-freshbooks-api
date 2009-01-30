@@ -80,4 +80,8 @@ class Freshbooks_Method_Result
         return $this->responseXML;
     }
     
+    public function debug(){
+        return '<pre>'.htmlentities($this->requestXML)."\n".htmlentities($this->responseXML).'</pre>';
+    }
+    
 }
