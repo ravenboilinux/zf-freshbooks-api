@@ -30,7 +30,7 @@ class Freshbooks_Method_Default extends Freshbooks_Method_Abstract
         $this->_arguments[$name] = $value;
     }
     
-    public function getRequestXml(){
+    public function getRequestXML(){
         $xml = '<?xml version="1.0" encoding="utf-8"?>'."\n".
                '<request method="'.$this->_methodName.'">';
         foreach($this->_arguments as $name => $value){
@@ -63,6 +63,15 @@ class Freshbooks_Method_Default extends Freshbooks_Method_Abstract
             $tag.="<{$name}><![CDATA[{$value}]]></{$name}>";
         }
         return $tag;
+    }
+    
+    public function __get($name){
+        switch($name){
+            case 'requestXML':
+            case 'requestBody':
+                return $this->getRequestXML();
+        }
+        return null;
     }
     
 }
