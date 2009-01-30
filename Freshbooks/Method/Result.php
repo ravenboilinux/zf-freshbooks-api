@@ -33,7 +33,15 @@ class Freshbooks_Method_Result
     }
     
     public function isError(){
-        return $this->_response->isError();
+        return $this->_response->isError() || $this->data->attributes()->status=='fail';
+    }
+    
+    public function getError(){
+        if( $this->_response->isError() ){
+            return $this->_response->getStatus().': '.$this->_response->getMessage();
+        }else{
+            return $this->data->message;
+        }
     }
     
     public function &getMethod(){
@@ -52,6 +60,9 @@ class Freshbooks_Method_Result
             case 'responseXMLElement':
             case 'data':
                 return $this->getResponseXMLElement();
+                
+            case 'method':
+                return $this->getMethod();
         }
         return null;
     }
