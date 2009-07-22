@@ -17,6 +17,8 @@
  * @copyright  Copyright (c) 2008 Owl Watch Consulting Services, LLC.
  */
 
+require_once( dirname(__FILE__).'/Method/Default.php' );
+
 class Freshbooks_Api
 {
     /**
@@ -32,6 +34,8 @@ class Freshbooks_Api
     
     protected $_apiUri = "";
     
+    protected $_apiUriPath = ""
+    
     protected $_token = "";
     
     protected $_lastResponse = null;
@@ -39,6 +43,8 @@ class Freshbooks_Api
     protected $_error = false;
     
     protected $_client = null;
+    
+    protected $_clientType='zend';
     
     protected function __construct()
     {
@@ -68,12 +74,19 @@ class Freshbooks_Api
         $method = null;
         
         $parts = explode(".", $methodName);
-        array_unshift($parts,"Freshbooks");
+        $path = dirname(__FILE__);
         foreach($parts as &$part){
             $part = ucfirst($part);
+            $path.='/'.$part;
         }
+        array_unshift($parts,"Freshbooks");
+        
         $className = implode('_', $parts);
         if( @class_exists($className)){
+            // see if the file is here...
+            if(file_exists($path.'.php')){
+                require_once($path.'.php');
+            }
             $method = new $className();
         }
         else{
@@ -86,10 +99,16 @@ class Freshbooks_Api
     public function dispatch(&$method){
         
         $client =& $this->getClient();
-        $client->setUri( $this->_apiUri );
-        $client->setRawData( $method->getRequestXML() );
-        $client->setAuth( $this->_token, 'XXX');
-        $method->setResponse( $client->request() );
+        if( $this->_clientType == 'zend'){
+            $client->setUri( $this->_apiUri );
+            $client->setRawData( $method->getRequestXML() );
+            $client->setAuth( $this->_token, 'XXX');
+            $method->setResponse( $client->request() );
+        }
+        else{
+            $client->post( $this->_apiUriPath, $method->getRequestXML() )
+            $method->setResponse( $client->getResponse() );
+        }
         return $method->getResult();
         
     }
@@ -97,15 +116,30 @@ class Freshbooks_Api
     protected function &getClient()
     {
         if( $this->_client == null ){
-            $this->_client = new Zend_Http_Client();
-            $this->_client->setConfig(array(
-                'timeout'       => 10,
-                'useragent'     => $this->_userAgent,
-            ));
-            $this->_client->setHeaders(array(
-                'X-Powered-By'  => $this->_poweredBy
-            ));
-            $this->_client->setMethod(Zend_Http_Client::POST);
+            if( class_exists('Zend_Http_Client')){
+                $this->_clientType = 'zend';
+                $this->_client = new Zend_Http_Client();
+                $this->_client->setConfig(array(
+                    'timeout'       => 20,
+                    'useragent'     => $this->_userAgent,
+                ));
+                $this->_client->setHeaders(array(
+                    'X-Powered-By'  => $this->_poweredBy
+                ));
+                $this->_client->setMethod(Zend_Http_Client::POST);
+            }
+            else{
+                require_once dirname(__FILE__).'/../Http/Client.php';
+                $this->_clientType = 'willison';
+                // we need to parse this uri
+                $parts = parse_url( $this->_apiUri );
+                $this->_apiUriPath = $parts['path'];
+                $this->_client = new Http_Client($parts['host']);
+                $this->_client->setUserAgent($this->_userAgent);
+                $this->_client->timeout = 20;
+                $this->_client->setAuthorization($this->_token,'XXX');
+                
+            }
         }
         return $this->_client;
     }

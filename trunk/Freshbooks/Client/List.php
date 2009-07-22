@@ -16,6 +16,7 @@
  * @package    Freshbooks_Api
  * @copyright  Copyright (c) 2008 Owl Watch Consulting Services, LLC.
  */
+require_once( dirname(__FILE__).'/Abstract.php' );
 
 class Freshbooks_Client_List extends Freshbooks_Method_Impl
 {
