@@ -14,6 +14,8 @@
  * @copyright  Copyright (c) 2008 Owl Watch Consulting Services, LLC.
  */
 
+require_once( dirname(__FILE__).'/Abstract.php' );
+
 class Freshbooks_Method_Impl extends Freshbooks_Method_Abstract
 {
     protected $_methodName;
